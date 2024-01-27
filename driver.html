@@ -54,6 +54,7 @@
         
         const acceptOrderButton = document.getElementById(`${data.order.id}-accept-order`);
         const rejectOrderButton = document.getElementById(`${data.order.id}-reject-order`);
+        const endOrderButton = document.getElementById(`${data.order.id}-end-order`);
 
         acceptOrderButton.addEventListener('click', () => {
             socket.emit('acceptOrder', { id: data.order.id, driver_id: localStorage.getItem('driverId') });
@@ -62,30 +63,70 @@
         rejectOrderButton.addEventListener('click', () => {
             socket.emit('rejectOrder', { id: data.order.id, driver_id: localStorage.getItem('driverId') });
         })
-    })
 
-    socket.on('noresponse', (data) => {
-        console.log(data);
-    
-        const acceptOrderButton = document.getElementById(`${data.order.id}-accept-order`);
-        const rejectOrderButton = document.getElementById(`${data.order.id}-reject-order`);
+        // endOrderButton.addEventListener('click', () => {
+        //     socket.emit('endOrder', { id: data.order.id, driver_id: localStorage.getItem('driverId') });
+        // })
 
-        if (acceptOrderButton) {
-            acceptOrderButton.disabled = true;
-            // acceptOrderButton.innerHTML = 'Accepted';
-        }
-
-        if (rejectOrderButton) {
-            rejectOrderButton.disabled = true;
-        }
     })
 
     socket.on('orderAccepted', (data) => {
         console.log(data);
     
+        const notificationContainer = document.getElementById('notification-container');
+
+        const  div = document.createElement('div')
+
+        div.innerHTML = `<div style="margin: 10px;" class="card">
+            <h5 class="card-header"> Accepted Order </h5>
+            <div class="card-body">
+                <h5 class="card-title">${data.order.sender.name} is on a ride</h5>
+                <p class="card-text">Current Location: ${data.order.current_location}</p>
+                <p class="card-text">Destination: ${data.order.destination}</p>
+                <p class="card-text">Price: N${data.order.price}</p>
+                <button id="${data.order.id}-on-ride" href="#" class="btn btn-primary">On Ride</button>
+                <button id="${data.order.id}-end-order" href="#" class="btn btn-danger">End ride</button>
+            </div>
+            </div>`
+        
+        notificationContainer.appendChild(div)
+
+        const onRideButton = document.getElementById(`${data.order.id}-on-ride`);
+        const endOrderButton = document.getElementById(`${data.order.id}-end-order`);
+        console.log(endOrderButton, onRideButton)
+        console.log("happy")
+       
+        endOrderButton.addEventListener('click', () => {
+            socket.emit('endRide', { id: data.order.id, driver_id: localStorage.getItem('driverId') });
+            console.log('emitting end ride')
+        })
+
+        if(onRideButton){
+            onRideButton.disabled = true
+        }
+    })
+
+    socket.on('rideEnded', (data) => {
+        console.log(data);
+    
+        
+        const onRideButton = document.getElementById(`${data.order.id}-on-ride`);
+        const endOrderButton = document.getElementById(`${data.order.id}-end-order`);
+       
+
+        if (endOrderButton) {
+            endOrderButton.disabled = true;
+            endOrderButton.innerHTML = 'Ride Ended'
+        }
+    })
+
+    socket.on('alreadyAccepted', (data) => {
+        console.log(data);
+    
         const acceptOrderButton = document.getElementById(`${data.order.id}-accept-order`);
         const rejectOrderButton = document.getElementById(`${data.order.id}-reject-order`);
-
+        // const endOrderButton = document.getElementById(`${data.order.id}-end-order`);
+       
         if (acceptOrderButton) {
             acceptOrderButton.disabled = true;
             acceptOrderButton.innerHTML = 'Accepted';
@@ -94,13 +135,18 @@
         if (rejectOrderButton) {
             rejectOrderButton.disabled = true;
         }
+
+        // if (endOrderButton) {
+        //     endOrderButton.disabled = true;
+        // }
     })
 
     socket.on('orderRejected', (data) => {
-        // console.log(data);
+        console.log(data);
         
         const acceptOrderButton = document.getElementById(`${data.order.id}-accept-order`);
         const rejectOrderButton = document.getElementById(`${data.order.id}-reject-order`);
+        // const endOrderButton = document.getElementById(`${data.order.id}-end-order`);
 
         if (acceptOrderButton) {
             acceptOrderButton.disabled = true;
@@ -110,6 +156,40 @@
             rejectOrderButton.disabled = true;
             rejectOrderButton.innerHTML = 'Rejected';
         }
+
+        // if (endOrderButton) {
+        //     endOrderButton.disabled = true;
+        // }
     })
+
+    socket.on('orderCleared', (data) => {
+        console.log(data);
+
+        const orderId = data.order.id;
+
+        // Update the UI when the order is cleared
+        const acceptOrderButton = document.getElementById(`${orderId}-accept-order`);
+        const rejectOrderButton = document.getElementById(`${orderId}-reject-order`);
+        // const endOrderButton = document.getElementById(`${data.order.id}-end-order`);
+
+        if (acceptOrderButton && rejectOrderButton) {
+            // Hide accept and reject buttons
+            acceptOrderButton.disabled = true;
+            rejectOrderButton.disabled = true;
+            // endOrderButton.disabled = true;
+
+            // Display a message indicating the order has been cleared
+            const notificationContainer = document.getElementById('notification-container');
+            const div = document.createElement('div');
+            div.innerHTML = `<div style="margin: 10px;" class="card">
+                <h5 class="card-header">Order Cleared </h5>
+                <div class="card-body">
+                    <h5 class="card-title">The order has been cleared</h5>
+                    <p class="card-text">Order ID: ${orderId}</p>
+                </div>
+                </div>`;
+            notificationContainer.appendChild(div);
+        }
+    });
 </script>
 </html>

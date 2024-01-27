@@ -98,5 +98,45 @@
         notificationContainer.appendChild(div)
     })
 
+    socket.on('orderCleared', (data) => {
+        console.log(data);
+        console.log('order has been cleared');
+    
+        const notificationContainer = document.getElementById('notification-container');
+
+        const div = document.createElement('div');
+
+        div.innerHTML = `<div style="margin: 10px;" class="card">
+            <h5 class="card-header">Order Request</h5>
+            <div class="card-body">
+                <h5 class="card-title"> Order cleared</h5>
+                <p class="card-text">No driver responded</p>
+            </div>
+            </div>`
+        
+        notificationContainer.appendChild(div)
+    })
+
+    socket.on('rideEnded', (data) => {
+        console.log(data);
+        console.log('order has come to an end');
+    
+        const notificationContainer = document.getElementById('notification-container');
+
+        const div = document.createElement('div');
+
+        div.innerHTML = `<div style="margin: 10px;" class="card">
+            <h5 class="card-header">End of Ride</h5>
+            <div class="card-body">
+                <h5 class="card-title"> Order </h5>
+                <p class="card-text">Thanks for trusting us with your life</p>
+                 <p class="card-text">Price: N${data.order.price}</p>
+            </div>
+            </div>`
+        
+        notificationContainer.appendChild(div)
+    })
+
+
 </script>
 </html>
