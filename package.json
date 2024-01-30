@@ -8,7 +8,7 @@
     "start": "nodemon index.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "Javy Joshua",
   "license": "ISC",
   "dependencies": {
     "axios": "^1.6.3",
