@@ -41,12 +41,17 @@
         div.innerHTML = `<div style="margin: 10px;" class="card">
             <h5 class="card-header">Order Request </h5>
             <div class="card-body">
+                <div class="card-order">
                 <h5 class="card-title">${data.order.sender.name} is requesting a ride</h5>
                 <p class="card-text">Current Location: ${data.order.current_location}</p>
                 <p class="card-text">Destination: ${data.order.destination}</p>
                 <p class="card-text">Price: N${data.order.price}</p>
+                </div>
+                <div id="card-button" style="display: flex;justify-content: space-between;">
                 <button id="${data.order.id}-accept-order" href="#" class="btn btn-primary">Accept</button>
                 <button id="${data.order.id}-reject-order" href="#" class="btn btn-danger">Reject</button>
+                <div id="${data.order.id}-button-container"></div>
+                </div>
             </div>
             </div>`
         
@@ -54,7 +59,7 @@
         
         const acceptOrderButton = document.getElementById(`${data.order.id}-accept-order`);
         const rejectOrderButton = document.getElementById(`${data.order.id}-reject-order`);
-        const endOrderButton = document.getElementById(`${data.order.id}-end-order`);
+        const buttonContainer = document.getElementById(`${data.order.id}-button-container`);
 
         acceptOrderButton.addEventListener('click', () => {
             socket.emit('acceptOrder', { id: data.order.id, driver_id: localStorage.getItem('driverId') });
@@ -64,46 +69,40 @@
             socket.emit('rejectOrder', { id: data.order.id, driver_id: localStorage.getItem('driverId') });
         })
 
-        // endOrderButton.addEventListener('click', () => {
-        //     socket.emit('endOrder', { id: data.order.id, driver_id: localStorage.getItem('driverId') });
-        // })
 
     })
 
     socket.on('orderAccepted', (data) => {
         console.log(data);
     
-        const notificationContainer = document.getElementById('notification-container');
+        const buttonContainer = document.getElementById(`${data.order.id}-button-container`);
 
-        const  div = document.createElement('div')
+        const  btn_div = document.createElement('div')
 
-        div.innerHTML = `<div style="margin: 10px;" class="card">
-            <h5 class="card-header"> Accepted Order </h5>
-            <div class="card-body">
-                <h5 class="card-title">${data.order.sender.name} is on a ride</h5>
-                <p class="card-text">Current Location: ${data.order.current_location}</p>
-                <p class="card-text">Destination: ${data.order.destination}</p>
-                <p class="card-text">Price: N${data.order.price}</p>
-                <button id="${data.order.id}-on-ride" href="#" class="btn btn-primary">On Ride</button>
-                <button id="${data.order.id}-end-order" href="#" class="btn btn-danger">End ride</button>
-            </div>
-            </div>`
+        btn_div.innerHTML = `<button id="${data.order.id}-end-order" href="#" class="btn btn-danger">End ride</button>`;
         
-        notificationContainer.appendChild(div)
+        buttonContainer.appendChild(btn_div)
 
-        const onRideButton = document.getElementById(`${data.order.id}-on-ride`);
+        // const onRideButton = document.getElementById(`${data.order.id}-on-ride`);
         const endOrderButton = document.getElementById(`${data.order.id}-end-order`);
-        console.log(endOrderButton, onRideButton)
-        console.log("happy")
+        const acceptOrderButton = document.getElementById(`${data.order.id}-accept-order`);
+        const rejectOrderButton = document.getElementById(`${data.order.id}-reject-order`);
+       
+        if (acceptOrderButton) {
+            acceptOrderButton.disabled = true;
+            acceptOrderButton.innerHTML = 'On Ride';
+        }
+
+        if (rejectOrderButton) {
+            rejectOrderButton.disabled = true;
+        }
        
         endOrderButton.addEventListener('click', () => {
             socket.emit('endRide', { id: data.order.id, driver_id: localStorage.getItem('driverId') });
             console.log('emitting end ride')
         })
 
-        if(onRideButton){
-            onRideButton.disabled = true
-        }
+        
     })
 
     socket.on('rideEnded', (data) => {
@@ -125,7 +124,6 @@
     
         const acceptOrderButton = document.getElementById(`${data.order.id}-accept-order`);
         const rejectOrderButton = document.getElementById(`${data.order.id}-reject-order`);
-        // const endOrderButton = document.getElementById(`${data.order.id}-end-order`);
        
         if (acceptOrderButton) {
             acceptOrderButton.disabled = true;
@@ -136,9 +134,6 @@
             rejectOrderButton.disabled = true;
         }
 
-        // if (endOrderButton) {
-        //     endOrderButton.disabled = true;
-        // }
     })
 
     socket.on('orderRejected', (data) => {
@@ -146,7 +141,6 @@
         
         const acceptOrderButton = document.getElementById(`${data.order.id}-accept-order`);
         const rejectOrderButton = document.getElementById(`${data.order.id}-reject-order`);
-        // const endOrderButton = document.getElementById(`${data.order.id}-end-order`);
 
         if (acceptOrderButton) {
             acceptOrderButton.disabled = true;
@@ -157,9 +151,6 @@
             rejectOrderButton.innerHTML = 'Rejected';
         }
 
-        // if (endOrderButton) {
-        //     endOrderButton.disabled = true;
-        // }
     })
 
     socket.on('orderCleared', (data) => {
@@ -170,13 +161,11 @@
         // Update the UI when the order is cleared
         const acceptOrderButton = document.getElementById(`${orderId}-accept-order`);
         const rejectOrderButton = document.getElementById(`${orderId}-reject-order`);
-        // const endOrderButton = document.getElementById(`${data.order.id}-end-order`);
 
         if (acceptOrderButton && rejectOrderButton) {
             // Hide accept and reject buttons
             acceptOrderButton.disabled = true;
             rejectOrderButton.disabled = true;
-            // endOrderButton.disabled = true;
 
             // Display a message indicating the order has been cleared
             const notificationContainer = document.getElementById('notification-container');
